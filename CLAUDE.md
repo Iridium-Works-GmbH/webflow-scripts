@@ -35,21 +35,7 @@ build.ts              # Custom build script using esbuild
 - `bun run dev` - Build and watch for changes
 - `bun run build -- --minify` - Build with minification
 
-## Features
-
-### TRUNCATE Sections
-
-Use special comments to mark code sections that should be removed during build (useful for mocking objects during development):
-
-```typescript
-//build:TRUNCATE_START
-const wf = { /* mock Webflow object for development */ };
-//build:TRUNCATE_END
-```
-
-Everything between `TRUNCATE_START` and `TRUNCATE_END` will be stripped from the final build.
-
-### Output Format
+## Output Format
 
 - Each compiled script gets an "Iridium Webflow script" comment banner
 - Scripts are bundled as CJS modules targeting ES2020

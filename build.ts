@@ -54,12 +54,9 @@ const buildFile = async (srcDir: string): Promise<void> => {
       }
     });
 
-    // Read the compiled JS and remove truncated sections
+    // Read the compiled JS and wrap in HTML
     const compiledJS = fs.readFileSync(jsOutFile, 'utf8');
-    const processedJS = removeTruncatedSections(compiledJS);
-
-    // Wrap in HTML
-    const htmlContent = `<script>\n${processedJS}\n</script>\n`;
+    const htmlContent = `<script>\n${compiledJS}\n</script>\n`;
     fs.writeFileSync(htmlOutFile, htmlContent);
 
     console.log(`Built ${srcDir}.js and ${srcDir}.html`);
@@ -67,30 +64,6 @@ const buildFile = async (srcDir: string): Promise<void> => {
     console.error(`Error building ${srcDir}:`, error);
   }
 };
-
-// removes sections required for mocking the `wf` webflow object
-const removeTruncatedSections = (source: string): string => {
-  const startDelimiter = '//build:TRUNCATE_START';
-  const endDelimiter = '//build:TRUNCATE_END';
-
-  let result = source;
-  let startIndex = result.indexOf(startDelimiter);
-
-  while (startIndex !== -1) {
-    const endIndex = result.indexOf(endDelimiter, startIndex);
-    if (endIndex === -1) {
-      // TODO terminate build
-      console.warn('Warning: Found TRUNCATE_START without matching TRUNCATE_END');
-      break;
-    }
-
-    // Remove everything from start delimiter to end delimiter (inclusive)
-    result = result.substring(0, startIndex) + result.substring(endIndex + endDelimiter.length);
-    startIndex = result.indexOf(startDelimiter);
-  }
-
-  return result;
-}
 
 // --------------
 // --- STAGES ---
