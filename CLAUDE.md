@@ -41,3 +41,9 @@ build.ts              # Custom build script using esbuild
 - Scripts are bundled as CJS modules targeting ES2020
 - No external dependencies - pure browser JavaScript output
 - HTML files in `dist/` contain ready-to-paste `<script>` tags
+
+## Staging Environment
+
+Canonical staging environment for testing:
+- Design mode: https://iridium-works-master-template.design.webflow.com/
+- Published site: https://iridium-works-master-template.webflow.io/
