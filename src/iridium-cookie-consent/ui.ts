@@ -1,5 +1,5 @@
-import { Category } from "./state";
-import { logErr } from "./logger";
+import { Category, ConsentState } from "./state";
+import { logErr, logInfo } from "./logger";
 
 // we require these values in the actual webflow components
 const ASK_BANNER = '.iridium-cc-banner2_component';
@@ -53,6 +53,7 @@ export const initUi = (
   disableAll: () => void,
   allowAll: () => void,
   onToggle: (which: Category) => void,
+  initialState: ConsentState,
 ): void => {
   const state: UiState = {
     askBanner: document.querySelector(ASK_BANNER)!,
@@ -109,24 +110,30 @@ export const initUi = (
 
   const askBanner = {
     show: () => {
+      logInfo("show ask banner");
       state.askBanner.style.display = 'flex';
+      state.opener.style.display = 'none';
     },
     hide: () => {
+      logInfo("show ask banner");
       state.askBanner.style.display = 'none';
       state.opener.style.display = 'flex';
     },
   };
   const details = {
     show: () => {
+      logInfo("show details banner");
       state.opener.style.display = 'none';
       state.details.style.display = 'flex';
     },
     hide: () => {
+      logInfo("show details banner");
       state.details.style.display = 'none';
       state.opener.style.display = 'flex';
     },
   };
   const check = (which: Category) => {
+    logInfo("ui check", which);
     const input = state.optionCheckboxInput(which);
     const visual = state.optionCheckboxVisual(which);
 
@@ -134,6 +141,7 @@ export const initUi = (
     visual.classList.add('w--redirected-checked');
   };
   const unCheck = (which: Category) => {
+    logInfo("ui uncheck", which);
     const input = state.optionCheckboxInput(which);
     const visual = state.optionCheckboxVisual(which);
 
@@ -144,10 +152,12 @@ export const initUi = (
 
 
   // set up listeners
+  logInfo("setting up click listeners");
 
   // disable all
   for (const decliner of [state.askBannerDeclineButton, state.allowAllButton]) {
     decliner.addEventListener('click', () => {
+      logInfo('clicked decliner', decliner);
       disableAll();
       unCheck('analytics');
       unCheck('marketing');
@@ -165,6 +175,7 @@ export const initUi = (
   // accept all
   for (const accepter of [state.askBannerAcceptButton, state.allowAllButton]) {
     state.askBannerAcceptButton.addEventListener('click', () => {
+      logInfo('clicked accepter', accepter);
       allowAll();
       check('analytics');
       check('marketing');
@@ -177,6 +188,7 @@ export const initUi = (
 
   for (const category of ['analytics', 'marketing', 'personalized'] as const) {
     state.optionField(category).addEventListener('click', () => {
+      logInfo('clicked option field of', category);
       onToggle(category);
 
       const input = state.optionCheckboxInput(category);
@@ -187,4 +199,20 @@ export const initUi = (
       }
     });
   }
+  logInfo('listeners fully wired up');
+
+  logInfo('applying initial state to ui');
+  if (initialState.checked) {
+    state.askBanner.style.display = 'none';
+    state.details.style.display = 'none';
+    state.opener.style.display = 'flex';
+  } else {
+    state.askBanner.style.display = 'flex';
+    state.details.style.display = 'none';
+    state.opener.style.display = 'none';
+  }
+
+  console.log(state);
+
+  logInfo('setup routine done');
 };

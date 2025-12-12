@@ -2,6 +2,7 @@ import { logErr, logInfo } from "./logger";
 import { allowAll, denyAll, toggleCheckbox } from "./api";
 import { initUi } from "./ui";
 import { sleep } from "./sleep";
+import { persist, state } from "./state";
 
 const init = async (withWf: boolean): Promise<void> => {
   if (withWf) {
@@ -9,6 +10,8 @@ const init = async (withWf: boolean): Promise<void> => {
   } else {
     logInfo("Beginning setup without `wf`");
   }
+
+  logInfo('encountered initial state', JSON.stringify(state));
 
   let failed = true;
   let backoff = 5; // milliseconds
@@ -24,6 +27,7 @@ const init = async (withWf: boolean): Promise<void> => {
         denyAll,
         allowAll,
         toggleCheckbox,
+        state,
       );
       failed = false;
     } catch (e) {
@@ -33,6 +37,8 @@ const init = async (withWf: boolean): Promise<void> => {
       failed = true;
     }
   }
+
+  logInfo('setup loop over');
 };
 
 if (typeof wf === 'undefined') {

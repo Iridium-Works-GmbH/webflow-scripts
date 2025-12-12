@@ -84,10 +84,16 @@ export const persist = (): void => {
   }
 
   if (state.analytics) {
-    wf.allowUserTracking({ activate: true });
+    if (typeof wf !== 'undefined') {
+      wf.allowUserTracking({ activate: true });
+    }
+
     setIntellimizeTrackingChoice(WebflowConsent.ALLOW);
   } else {
-    wf.denyUserTracking();
+    if (typeof wf !== 'undefined') {
+      wf.denyUserTracking();
+    }
+
     purgeIntellimize();
   }
 };
