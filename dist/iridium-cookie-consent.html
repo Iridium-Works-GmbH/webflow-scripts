@@ -116,28 +116,28 @@ var toggleCheckbox = (which) => {
 };
 
 // src/iridium-cookie-consent/ui.ts
-var ASK_BANNER = "iridium-cc-banner2_component";
+var ASK_BANNER = ".iridium-cc-banner2_component";
 var ASK_BANNER_DECLINE_BUTTON = "a.iridium-cc-banner2_button_decline";
-var ASK_BANNER_ACCEPT_BUTTON = 'iridium-cc-banner2_button[iridium-cc="allow"]';
-var OPENER = "iridium-cc-manager2_button";
-var DETAILS = "fs-cc-prefs2_component";
-var CLOSE = "iridium-cc-preferences2_close-icon";
-var OPTION_FIELD = "iridium-cc-prefs2_option";
-var OPTION_CHECKBOX_VISUAL = "w-checkbox-input";
-var OPTION_CHECKBOX_INPUT = (which) => `iridium-cc-checkbox="${which}"`;
+var ASK_BANNER_ACCEPT_BUTTON = '.iridium-cc-banner2_button[iridium-cc="allow"]';
+var OPENER = ".iridium-cc-manager2_button";
+var DETAILS = ".iridium-cc-prefs2_component";
+var CLOSE = ".iridium-cc-preferences2_close-icon";
+var OPTION_FIELD = ".iridium-cc-prefs2_option";
+var OPTION_CHECKBOX_VISUAL = ".w-checkbox-input";
+var OPTION_CHECKBOX_INPUT = (which) => `[iridium-cc-checkbox="${which}"]`;
 var DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="deny"]';
 var ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="allow"]';
-var SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="submit"]';
+var SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs2_submit.w-button[iridium-cc="submit"]';
 var initUi = (disableAll, allowAll2, onToggle) => {
   const state2 = {
-    askBanner: document.querySelector(`.${ASK_BANNER}`),
-    askBannerDeclineButton: document.querySelector(`.${ASK_BANNER_DECLINE_BUTTON}`),
-    askBannerAcceptButton: document.querySelector(`.${ASK_BANNER_ACCEPT_BUTTON}`),
-    opener: document.querySelector(`.${OPENER}`),
-    details: document.querySelector(`.${DETAILS}`),
-    close: document.querySelector(`.${CLOSE}`),
+    askBanner: document.querySelector(ASK_BANNER),
+    askBannerDeclineButton: document.querySelector(ASK_BANNER_DECLINE_BUTTON),
+    askBannerAcceptButton: document.querySelector(ASK_BANNER_ACCEPT_BUTTON),
+    opener: document.querySelector(OPENER),
+    details: document.querySelector(DETAILS),
+    close: document.querySelector(CLOSE),
     optionField: (which) => {
-      const all = document.querySelectorAll(`.${OPTION_FIELD}`);
+      const all = document.querySelectorAll(OPTION_FIELD);
       const selector = OPTION_CHECKBOX_INPUT(which);
       for (const candidate of all) {
         const correctCheckbox = candidate.querySelector(selector);
@@ -149,7 +149,7 @@ var initUi = (disableAll, allowAll2, onToggle) => {
       throw logErr("no candidate matches", which);
     },
     optionCheckboxVisual: (which) => {
-      const all = document.querySelectorAll(`.${OPTION_CHECKBOX_VISUAL}`);
+      const all = document.querySelectorAll(OPTION_CHECKBOX_VISUAL);
       const selector = OPTION_CHECKBOX_INPUT(which);
       for (const candidate of all) {
         const root = candidate.parentElement;
@@ -164,9 +164,9 @@ var initUi = (disableAll, allowAll2, onToggle) => {
     optionCheckboxInput: (which) => {
       return document.querySelector(which);
     },
-    disableAllButton: document.querySelector(`.${DISABLE_ALL_BUTTON}`),
-    allowAllButton: document.querySelector(`.${ALLOW_ALL_BUTTON}`),
-    saveSettingsButton: document.querySelector(`.${SAVE_SETTINGS_BUTTON}`)
+    disableAllButton: document.querySelector(DISABLE_ALL_BUTTON),
+    allowAllButton: document.querySelector(ALLOW_ALL_BUTTON),
+    saveSettingsButton: document.querySelector(SAVE_SETTINGS_BUTTON)
   };
   for (const [key, val] of Object.entries(state2)) {
     switch (key) {
@@ -246,14 +246,46 @@ var initUi = (disableAll, allowAll2, onToggle) => {
   }
 };
 
+// src/iridium-cookie-consent/sleep.ts
+var sleep = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 // src/iridium-cookie-consent/index.ts
-wf.ready(() => {
-  logInfo("Beginning setup");
-  initUi(
-    denyAll,
-    allowAll,
-    toggleCheckbox
-  );
-});
+var init = async (withWf) => {
+  if (withWf) {
+    logInfo("Beginning setup with `wf`");
+  } else {
+    logInfo("Beginning setup without `wf`");
+  }
+  let failed = true;
+  let backoff = 5;
+  const delay = () => {
+    backoff = Math.ceil(backoff * 1.2);
+  };
+  while (failed) {
+    logInfo("another trial for setup");
+    try {
+      initUi(
+        denyAll,
+        allowAll,
+        toggleCheckbox
+      );
+      failed = false;
+    } catch (e) {
+      delay();
+      await sleep(backoff);
+      logErr("ran into problem during setup, trying again in", backoff);
+      failed = true;
+    }
+  }
+};
+if (typeof wf === "undefined") {
+  init(false);
+} else {
+  wf.ready(() => {
+    init(true);
+  });
+}
 
 </script>

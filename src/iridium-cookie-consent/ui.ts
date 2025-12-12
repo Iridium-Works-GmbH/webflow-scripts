@@ -2,18 +2,18 @@ import { Category } from "./state";
 import { logErr } from "./logger";
 
 // we require these values in the actual webflow components
-const ASK_BANNER = 'iridium-cc-banner2_component';
+const ASK_BANNER = '.iridium-cc-banner2_component';
 const ASK_BANNER_DECLINE_BUTTON = 'a.iridium-cc-banner2_button_decline';
-const ASK_BANNER_ACCEPT_BUTTON = 'iridium-cc-banner2_button[iridium-cc="allow"]';
-const OPENER = 'iridium-cc-manager2_button';
-const DETAILS = 'fs-cc-prefs2_component';
-const CLOSE = 'iridium-cc-preferences2_close-icon';
-const OPTION_FIELD = 'iridium-cc-prefs2_option';
-const OPTION_CHECKBOX_VISUAL = 'w-checkbox-input';
-const OPTION_CHECKBOX_INPUT = (which: Category) => `iridium-cc-checkbox="${which}"`;
+const ASK_BANNER_ACCEPT_BUTTON = '.iridium-cc-banner2_button[iridium-cc="allow"]';
+const OPENER = '.iridium-cc-manager2_button';
+const DETAILS = '.iridium-cc-prefs2_component';
+const CLOSE = '.iridium-cc-preferences2_close-icon';
+const OPTION_FIELD = '.iridium-cc-prefs2_option';
+const OPTION_CHECKBOX_VISUAL = '.w-checkbox-input';
+const OPTION_CHECKBOX_INPUT = (which: Category) => `[iridium-cc-checkbox="${which}"]`;
 const DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="deny"]';
 const ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="allow"]';
-const SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="submit"]';
+const SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs2_submit.w-button[iridium-cc="submit"]';
 
 type UiState = {
   askBanner: HTMLElement;
@@ -55,14 +55,14 @@ export const initUi = (
   onToggle: (which: Category) => void,
 ): void => {
   const state: UiState = {
-    askBanner: document.querySelector(`.${ASK_BANNER}`)!,
-    askBannerDeclineButton: document.querySelector(`.${ASK_BANNER_DECLINE_BUTTON}`)!,
-    askBannerAcceptButton: document.querySelector(`.${ASK_BANNER_ACCEPT_BUTTON}`)!,
-    opener: document.querySelector(`.${OPENER}`)!,
-    details: document.querySelector(`.${DETAILS}`)!,
-    close: document.querySelector(`.${CLOSE}`)!,
+    askBanner: document.querySelector(ASK_BANNER)!,
+    askBannerDeclineButton: document.querySelector(ASK_BANNER_DECLINE_BUTTON)!,
+    askBannerAcceptButton: document.querySelector(ASK_BANNER_ACCEPT_BUTTON)!,
+    opener: document.querySelector(OPENER)!,
+    details: document.querySelector(DETAILS)!,
+    close: document.querySelector(CLOSE)!,
     optionField: (which) => {
-      const all = document.querySelectorAll(`.${OPTION_FIELD}`);
+      const all = document.querySelectorAll(OPTION_FIELD);
       const selector = OPTION_CHECKBOX_INPUT(which);
       for (const candidate of all) {
         const correctCheckbox = candidate.querySelector(selector);
@@ -73,7 +73,7 @@ export const initUi = (
       throw logErr('no candidate matches', which);
     },
     optionCheckboxVisual: (which) => {
-      const all = document.querySelectorAll(`.${OPTION_CHECKBOX_VISUAL}`);
+      const all = document.querySelectorAll(OPTION_CHECKBOX_VISUAL);
       const selector = OPTION_CHECKBOX_INPUT(which);
       for (const candidate of all) {
         const root = candidate.parentElement as Element;
@@ -87,9 +87,9 @@ export const initUi = (
     optionCheckboxInput: (which) => {
       return document.querySelector(which)!;
     },
-    disableAllButton: document.querySelector(`.${DISABLE_ALL_BUTTON}`)!,
-    allowAllButton: document.querySelector(`.${ALLOW_ALL_BUTTON}`)!,
-    saveSettingsButton: document.querySelector(`.${SAVE_SETTINGS_BUTTON}`)!,
+    disableAllButton: document.querySelector(DISABLE_ALL_BUTTON)!,
+    allowAllButton: document.querySelector(ALLOW_ALL_BUTTON)!,
+    saveSettingsButton: document.querySelector(SAVE_SETTINGS_BUTTON)!,
   };
   // verify statics
   for (const [key, val] of Object.entries(state)) {
