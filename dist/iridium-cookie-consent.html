@@ -70,11 +70,19 @@ var initialState = () => {
   const marketing = readConsent("marketing");
   const personalized = readConsent("personalized");
   const analytics = readConsent("analytics");
+  let checked = true;
+  if (marketing === null) {
+    checked = false;
+  } else if (personalized === null) {
+    checked = false;
+  } else if (analytics === null) {
+    checked = false;
+  }
   const s = {
-    checked: !!(marketing || personalized || analytics),
-    analytics: !!analytics,
-    marketing: !!marketing,
-    personalized: !!personalized
+    checked,
+    analytics: analytics === "allow" /* ALLOW */,
+    marketing: marketing === "allow" /* ALLOW */,
+    personalized: personalized === "allow" /* ALLOW */
   };
   return s;
 };
@@ -87,10 +95,14 @@ var persist = () => {
     localStorage.setItem(lsKey, value);
   }
   if (state.analytics) {
-    wf.allowUserTracking({ activate: true });
+    if (typeof wf !== "undefined") {
+      wf.allowUserTracking({ activate: true });
+    }
     setIntellimizeTrackingChoice("allow" /* ALLOW */);
   } else {
-    wf.denyUserTracking();
+    if (typeof wf !== "undefined") {
+      wf.denyUserTracking();
+    }
     purgeIntellimize();
   }
 };
@@ -111,8 +123,10 @@ var denyAll = () => {
   persist();
 };
 var toggleCheckbox = (which) => {
-  state[which] = !!state[which];
+  const newVal = !state[which];
+  state[which] = newVal;
   persist();
+  return newVal;
 };
 
 // src/iridium-cookie-consent/ui.ts
@@ -128,7 +142,7 @@ var OPTION_CHECKBOX_INPUT = (which) => `[iridium-cc-checkbox="${which}"]`;
 var DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="deny"]';
 var ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="allow"]';
 var SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs2_submit.w-button[iridium-cc="submit"]';
-var initUi = (disableAll, allowAll2, onToggle) => {
+var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
   const state2 = {
     askBanner: document.querySelector(ASK_BANNER),
     askBannerDeclineButton: document.querySelector(ASK_BANNER_DECLINE_BUTTON),
@@ -162,7 +176,7 @@ var initUi = (disableAll, allowAll2, onToggle) => {
       throw logErr("no candidate matches", which);
     },
     optionCheckboxInput: (which) => {
-      return document.querySelector(which);
+      return document.querySelector(OPTION_CHECKBOX_INPUT(which));
     },
     disableAllButton: document.querySelector(DISABLE_ALL_BUTTON),
     allowAllButton: document.querySelector(ALLOW_ALL_BUTTON),
@@ -182,37 +196,46 @@ var initUi = (disableAll, allowAll2, onToggle) => {
   }
   const askBanner = {
     show: () => {
+      logInfo("show ask banner");
       state2.askBanner.style.display = "flex";
+      state2.opener.style.display = "none";
     },
     hide: () => {
+      logInfo("show ask banner");
       state2.askBanner.style.display = "none";
       state2.opener.style.display = "flex";
     }
   };
   const details = {
     show: () => {
+      logInfo("show details banner");
       state2.opener.style.display = "none";
       state2.details.style.display = "flex";
     },
     hide: () => {
+      logInfo("show details banner");
       state2.details.style.display = "none";
       state2.opener.style.display = "flex";
     }
   };
   const check = (which) => {
+    logInfo("ui check", which);
     const input = state2.optionCheckboxInput(which);
     const visual = state2.optionCheckboxVisual(which);
     input.checked = true;
     visual.classList.add("w--redirected-checked");
   };
   const unCheck = (which) => {
+    logInfo("ui uncheck", which);
     const input = state2.optionCheckboxInput(which);
     const visual = state2.optionCheckboxVisual(which);
     input.checked = false;
     visual.classList.remove("w--redirected-checked");
   };
-  for (const decliner of [state2.askBannerDeclineButton, state2.allowAllButton]) {
+  logInfo("setting up click listeners");
+  for (const decliner of [state2.askBannerDeclineButton, state2.disableAllButton]) {
     decliner.addEventListener("click", () => {
+      logInfo("clicked decliner", decliner);
       disableAll();
       unCheck("analytics");
       unCheck("marketing");
@@ -223,8 +246,10 @@ var initUi = (disableAll, allowAll2, onToggle) => {
   }
   state2.opener.addEventListener("click", details.show);
   state2.close.addEventListener("click", details.hide);
+  state2.saveSettingsButton.addEventListener("click", details.hide);
   for (const accepter of [state2.askBannerAcceptButton, state2.allowAllButton]) {
-    state2.askBannerAcceptButton.addEventListener("click", () => {
+    accepter.addEventListener("click", () => {
+      logInfo("clicked accepter", accepter);
       allowAll2();
       check("analytics");
       check("marketing");
@@ -235,15 +260,36 @@ var initUi = (disableAll, allowAll2, onToggle) => {
   }
   for (const category of ["analytics", "marketing", "personalized"]) {
     state2.optionField(category).addEventListener("click", () => {
-      onToggle(category);
-      const input = state2.optionCheckboxInput(category);
-      if (input.checked) {
-        unCheck(category);
-      } else {
+      logInfo("clicked option field of", category);
+      const newVal = onToggle(category);
+      if (newVal) {
         check(category);
+      } else {
+        unCheck(category);
       }
     });
   }
+  logInfo("listeners fully wired up");
+  logInfo("applying initial state to ui");
+  if (initialState2.checked) {
+    state2.askBanner.style.display = "none";
+    state2.details.style.display = "none";
+    state2.opener.style.display = "flex";
+    for (const category of ["analytics", "marketing", "personalized"]) {
+      const checked = initialState2[category];
+      if (checked) {
+        check(category);
+      } else {
+        unCheck(category);
+      }
+    }
+  } else {
+    state2.askBanner.style.display = "flex";
+    state2.details.style.display = "none";
+    state2.opener.style.display = "none";
+  }
+  console.log(state2);
+  logInfo("setup routine done");
 };
 
 // src/iridium-cookie-consent/sleep.ts
@@ -258,6 +304,7 @@ var init = async (withWf) => {
   } else {
     logInfo("Beginning setup without `wf`");
   }
+  logInfo("encountered initial state", JSON.stringify(state));
   let failed = true;
   let backoff = 5;
   const delay = () => {
@@ -269,7 +316,8 @@ var init = async (withWf) => {
       initUi(
         denyAll,
         allowAll,
-        toggleCheckbox
+        toggleCheckbox,
+        state
       );
       failed = false;
     } catch (e) {
@@ -279,6 +327,7 @@ var init = async (withWf) => {
       failed = true;
     }
   }
+  logInfo("setup loop over");
 };
 if (typeof wf === "undefined") {
   init(false);

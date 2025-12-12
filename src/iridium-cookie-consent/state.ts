@@ -56,11 +56,20 @@ const initialState = (): ConsentState => {
   const personalized = readConsent('personalized');
   const analytics = readConsent('analytics');
 
+  let checked = true;
+  if (marketing === null) {
+    checked = false;
+  } else if (personalized === null) {
+    checked = false;
+  } else if (analytics === null) {
+    checked = false;
+  }
+
   const s: ConsentState = {
-    checked: !!(marketing || personalized || analytics),
-    analytics: !!analytics,
-    marketing: !!marketing,
-    personalized: !!personalized,
+    checked,
+    analytics: analytics === WebflowConsent.ALLOW,
+    marketing: marketing === WebflowConsent.ALLOW,
+    personalized: personalized === WebflowConsent.ALLOW,
   };
   return s;
 };

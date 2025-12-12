@@ -18,7 +18,10 @@ export const denyAll = () => {
   persist();
 };
 
-export const toggleCheckbox = (which: Category): void => {
-  state[which] = !!state[which];
+export const toggleCheckbox = (which: Category): boolean => {
+  const newVal = !(state[which]);
+  state[which] = newVal;
   persist();
+
+  return newVal;
 };

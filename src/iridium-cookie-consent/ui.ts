@@ -52,7 +52,7 @@ export type UiApi = {
 export const initUi = (
   disableAll: () => void,
   allowAll: () => void,
-  onToggle: (which: Category) => void,
+  onToggle: (which: Category) => boolean,
   initialState: ConsentState,
 ): void => {
   const state: UiState = {
@@ -86,7 +86,7 @@ export const initUi = (
       throw logErr('no candidate matches', which);
     },
     optionCheckboxInput: (which) => {
-      return document.querySelector(which)!;
+      return document.querySelector(OPTION_CHECKBOX_INPUT(which))!;
     },
     disableAllButton: document.querySelector(DISABLE_ALL_BUTTON)!,
     allowAllButton: document.querySelector(ALLOW_ALL_BUTTON)!,
@@ -151,11 +151,10 @@ export const initUi = (
 
 
 
-  // set up listeners
   logInfo("setting up click listeners");
 
   // disable all
-  for (const decliner of [state.askBannerDeclineButton, state.allowAllButton]) {
+  for (const decliner of [state.askBannerDeclineButton, state.disableAllButton]) {
     decliner.addEventListener('click', () => {
       logInfo('clicked decliner', decliner);
       disableAll();
@@ -171,10 +170,11 @@ export const initUi = (
   // open/close details
   state.opener.addEventListener('click', details.show);
   state.close.addEventListener('click', details.hide);
+  state.saveSettingsButton.addEventListener('click', details.hide);
 
   // accept all
   for (const accepter of [state.askBannerAcceptButton, state.allowAllButton]) {
-    state.askBannerAcceptButton.addEventListener('click', () => {
+    accepter.addEventListener('click', () => {
       logInfo('clicked accepter', accepter);
       allowAll();
       check('analytics');
@@ -189,13 +189,12 @@ export const initUi = (
   for (const category of ['analytics', 'marketing', 'personalized'] as const) {
     state.optionField(category).addEventListener('click', () => {
       logInfo('clicked option field of', category);
-      onToggle(category);
 
-      const input = state.optionCheckboxInput(category);
-      if (input.checked) {
-        unCheck(category);
-      } else {
+      const newVal = onToggle(category);
+      if (newVal) {
         check(category);
+      } else {
+        unCheck(category);
       }
     });
   }
@@ -206,6 +205,15 @@ export const initUi = (
     state.askBanner.style.display = 'none';
     state.details.style.display = 'none';
     state.opener.style.display = 'flex';
+
+    for (const category of ['analytics', 'marketing', 'personalized'] as const) {
+      const checked = initialState[category];
+      if (checked) {
+        check(category);
+      } else {
+        unCheck(category);
+      }
+    }
   } else {
     state.askBanner.style.display = 'flex';
     state.details.style.display = 'none';
