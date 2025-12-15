@@ -115,7 +115,7 @@ export const initUi = (
       state.opener.style.display = 'none';
     },
     hide: () => {
-      logInfo("show ask banner");
+      logInfo("hide ask banner");
       state.askBanner.style.display = 'none';
       state.opener.style.display = 'flex';
     },
@@ -127,7 +127,7 @@ export const initUi = (
       state.details.style.display = 'flex';
     },
     hide: () => {
-      logInfo("show details banner");
+      logInfo("hide details banner");
       state.details.style.display = 'none';
       state.opener.style.display = 'flex';
     },
