@@ -126,6 +126,7 @@ var toggleCheckbox = (which) => {
   const newVal = !state[which];
   state[which] = newVal;
   persist();
+  logInfo("toggled checkbox", which, newVal);
   return newVal;
 };
 
@@ -201,7 +202,7 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
       state2.opener.style.display = "none";
     },
     hide: () => {
-      logInfo("show ask banner");
+      logInfo("hide ask banner");
       state2.askBanner.style.display = "none";
       state2.opener.style.display = "flex";
     }
@@ -213,7 +214,7 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
       state2.details.style.display = "flex";
     },
     hide: () => {
-      logInfo("show details banner");
+      logInfo("hide details banner");
       state2.details.style.display = "none";
       state2.opener.style.display = "flex";
     }
@@ -224,6 +225,11 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
     const visual = state2.optionCheckboxVisual(which);
     input.checked = true;
     visual.classList.add("w--redirected-checked");
+    setTimeout(() => {
+      input.checked = true;
+      visual.classList.add("w--redirected-checked");
+    }, 0);
+    logInfo(visual.classList);
   };
   const unCheck = (which) => {
     logInfo("ui uncheck", which);
@@ -231,6 +237,11 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
     const visual = state2.optionCheckboxVisual(which);
     input.checked = false;
     visual.classList.remove("w--redirected-checked");
+    setTimeout(() => {
+      input.checked = true;
+      visual.classList.remove("w--redirected-checked");
+    }, 0);
+    logInfo(visual.classList);
   };
   logInfo("setting up click listeners");
   for (const decliner of [state2.askBannerDeclineButton, state2.disableAllButton]) {
@@ -259,14 +270,21 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
     });
   }
   for (const category of ["analytics", "marketing", "personalized"]) {
-    state2.optionField(category).addEventListener("click", () => {
-      logInfo("clicked option field of", category);
+    let debounce = false;
+    state2.optionCheckboxInput(category).addEventListener("click", () => {
+      console.log(JSON.stringify(initialState2));
+      if (debounce) return;
+      debounce = true;
+      logInfo("clicked option of", category);
       const newVal = onToggle(category);
       if (newVal) {
         check(category);
       } else {
         unCheck(category);
       }
+      setTimeout(() => {
+        debounce = false;
+      }, 50);
     });
   }
   logInfo("listeners fully wired up");

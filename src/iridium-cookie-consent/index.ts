@@ -2,7 +2,7 @@ import { logErr, logInfo } from "./logger";
 import { allowAll, denyAll, toggleCheckbox } from "./api";
 import { initUi } from "./ui";
 import { sleep } from "./sleep";
-import { persist, state } from "./state";
+import { state } from "./state";
 
 const init = async (withWf: boolean): Promise<void> => {
   if (withWf) {

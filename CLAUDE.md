@@ -47,3 +47,4 @@ build.ts              # Custom build script using esbuild
 Canonical staging environment for testing:
 - Design mode: https://iridium-works-master-template.design.webflow.com/
 - Published site: https://iridium-works-master-template.webflow.io/
+- Custom code: https://webflow.com/dashboard/sites/iridium-works-master-template/custom-code

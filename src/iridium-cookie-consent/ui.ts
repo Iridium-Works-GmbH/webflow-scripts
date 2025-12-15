@@ -139,6 +139,12 @@ export const initUi = (
 
     input.checked = true;
     visual.classList.add('w--redirected-checked');
+    // unknown reason why this is necessary, but otherwise it just doesn't work
+    setTimeout(() => {
+      input.checked = true;
+      visual.classList.add('w--redirected-checked');
+    }, 0);
+    logInfo(visual.classList);
   };
   const unCheck = (which: Category) => {
     logInfo("ui uncheck", which);
@@ -147,6 +153,12 @@ export const initUi = (
 
     input.checked = false;
     visual.classList.remove('w--redirected-checked');
+    // unknown reason why this is necessary, but otherwise it just doesn't work
+    setTimeout(() => {
+      input.checked = true;
+      visual.classList.remove('w--redirected-checked');
+    }, 0);
+    logInfo(visual.classList);
   };
 
 
@@ -187,8 +199,13 @@ export const initUi = (
   }
 
   for (const category of ['analytics', 'marketing', 'personalized'] as const) {
-    state.optionField(category).addEventListener('click', () => {
-      logInfo('clicked option field of', category);
+    let debounce = false;
+    state.optionCheckboxInput(category).addEventListener('click', () => {
+      console.log(JSON.stringify(initialState));
+      if (debounce) return;
+      debounce = true;
+
+      logInfo('clicked option of', category);
 
       const newVal = onToggle(category);
       if (newVal) {
@@ -196,6 +213,8 @@ export const initUi = (
       } else {
         unCheck(category);
       }
+
+      setTimeout(() => { debounce = false; }, 50);
     });
   }
   logInfo('listeners fully wired up');

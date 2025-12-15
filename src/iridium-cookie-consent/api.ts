@@ -1,3 +1,4 @@
+import { logInfo } from "./logger";
 import { Category, persist, state } from "./state";
 
 export const allowAll = () => {
@@ -23,5 +24,6 @@ export const toggleCheckbox = (which: Category): boolean => {
   state[which] = newVal;
   persist();
 
+  logInfo("toggled checkbox", which, newVal);
   return newVal;
 };
