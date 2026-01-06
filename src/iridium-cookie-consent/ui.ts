@@ -2,18 +2,19 @@ import { Category, ConsentState } from "./state";
 import { logErr, logInfo } from "./logger";
 
 // we require these values in the actual webflow components
-const ASK_BANNER = '.iridium-cc-banner2_component';
-const ASK_BANNER_DECLINE_BUTTON = 'a.iridium-cc-banner2_button_decline';
-const ASK_BANNER_ACCEPT_BUTTON = '.iridium-cc-banner2_button[iridium-cc="allow"]';
-const OPENER = '.iridium-cc-manager2_button';
-const DETAILS = '.iridium-cc-prefs2_component';
-const CLOSE = '.iridium-cc-preferences2_close-icon';
-const OPTION_FIELD = '.iridium-cc-prefs2_option';
-const OPTION_CHECKBOX_VISUAL = '.w-checkbox-input';
+const ASK_BANNER = '.iridium-cc-banner_component';
+const ASK_BANNER_DECLINE_BUTTON = 'a.iridium-cc-banner_button_decline';
+const ASK_BANNER_ACCEPT_BUTTON = '.iridium-cc-banner_button[iridium-cc="allow"]';
+const OPENER = '.iridium-cc-manager_component';
+const DETAILS = '.iridium-cc-prefs_component';
+const CLOSE = '.iridium-cc-preferences_close-icon';
+const OPTION_FIELD = '.iridium-cc-prefs_option';
+const OPTION_CHECKBOX_VISUAL = '.switch-wrap';
+const OPTION_TOGGLE_KNUB = '.circle';
 const OPTION_CHECKBOX_INPUT = (which: Category) => `[iridium-cc-checkbox="${which}"]`;
-const DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="deny"]';
-const ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="allow"]';
-const SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs2_submit.w-button[iridium-cc="submit"]';
+const DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs_button[iridium-cc="deny"]';
+const ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs_button[iridium-cc="allow"]';
+const SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs_submit.w-button[iridium-cc="submit"]';
 
 type UiState = {
   askBanner: HTMLElement;
@@ -23,7 +24,8 @@ type UiState = {
   details: HTMLElement;
   close: HTMLElement;
   optionField: (which: Category) => HTMLElement; // 4 exist, first is static `necessary`
-  optionCheckboxVisual: (which: Category) => HTMLElement; // controls appearance
+  optionToggleVisual: (which: Category) => HTMLElement; // controls appearance
+  optionToggleKnub: (which: Category) => HTMLElement; // little toggle knub
   optionCheckboxInput: (which: Category) => HTMLInputElement; // keeps `.value` in state
   disableAllButton: HTMLElement;
   allowAllButton: HTMLElement;
@@ -73,7 +75,7 @@ export const initUi = (
 
       throw logErr('no candidate matches', which);
     },
-    optionCheckboxVisual: (which) => {
+    optionToggleVisual: (which) => {
       const all = document.querySelectorAll(OPTION_CHECKBOX_VISUAL);
       const selector = OPTION_CHECKBOX_INPUT(which);
       for (const candidate of all) {
@@ -84,6 +86,19 @@ export const initUi = (
       }
 
       throw logErr('no candidate matches', which);
+    },
+    optionToggleKnub: (which) => {
+      const all = document.querySelectorAll(OPTION_CHECKBOX_VISUAL);
+      const selector = OPTION_CHECKBOX_INPUT(which);
+      for (const candidate of all) {
+        const root = candidate.parentElement as Element;
+        const correctCheckbox = root.querySelector(selector);
+        if (correctCheckbox === null) { continue; }
+
+        return candidate.querySelector(OPTION_TOGGLE_KNUB) as HTMLElement;
+      }
+
+      throw logErr('no candidate matches (knub)', which);
     },
     optionCheckboxInput: (which) => {
       return document.querySelector(OPTION_CHECKBOX_INPUT(which))!;
@@ -135,28 +150,34 @@ export const initUi = (
   const check = (which: Category) => {
     logInfo("ui check", which);
     const input = state.optionCheckboxInput(which);
-    const visual = state.optionCheckboxVisual(which);
+    const visual = state.optionToggleVisual(which);
+    const knub = state.optionToggleKnub(which);
 
     input.checked = true;
-    visual.classList.add('w--redirected-checked');
+    visual.classList.add('switch-checked');
+    knub.classList.add('circle-checked');
     // unknown reason why this is necessary, but otherwise it just doesn't work
     setTimeout(() => {
       input.checked = true;
-      visual.classList.add('w--redirected-checked');
+      visual.classList.add('switch-checked');
+      knub.classList.add('circle-checked');
     }, 0);
     logInfo(visual.classList);
   };
   const unCheck = (which: Category) => {
     logInfo("ui uncheck", which);
     const input = state.optionCheckboxInput(which);
-    const visual = state.optionCheckboxVisual(which);
+    const visual = state.optionToggleVisual(which);
+    const knub = state.optionToggleKnub(which);
 
     input.checked = false;
-    visual.classList.remove('w--redirected-checked');
+    visual.classList.remove('switch-checked');
+    knub.classList.remove('circle-checked');
     // unknown reason why this is necessary, but otherwise it just doesn't work
     setTimeout(() => {
-      input.checked = true;
-      visual.classList.remove('w--redirected-checked');
+      input.checked = false;
+      visual.classList.remove('switch-checked');
+      knub.classList.remove('circle-checked');
     }, 0);
     logInfo(visual.classList);
   };

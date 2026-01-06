@@ -131,18 +131,19 @@ var toggleCheckbox = (which) => {
 };
 
 // src/iridium-cookie-consent/ui.ts
-var ASK_BANNER = ".iridium-cc-banner2_component";
-var ASK_BANNER_DECLINE_BUTTON = "a.iridium-cc-banner2_button_decline";
-var ASK_BANNER_ACCEPT_BUTTON = '.iridium-cc-banner2_button[iridium-cc="allow"]';
-var OPENER = ".iridium-cc-manager2_button";
-var DETAILS = ".iridium-cc-prefs2_component";
-var CLOSE = ".iridium-cc-preferences2_close-icon";
-var OPTION_FIELD = ".iridium-cc-prefs2_option";
-var OPTION_CHECKBOX_VISUAL = ".w-checkbox-input";
+var ASK_BANNER = ".iridium-cc-banner_component";
+var ASK_BANNER_DECLINE_BUTTON = "a.iridium-cc-banner_button_decline";
+var ASK_BANNER_ACCEPT_BUTTON = '.iridium-cc-banner_button[iridium-cc="allow"]';
+var OPENER = ".iridium-cc-manager_component";
+var DETAILS = ".iridium-cc-prefs_component";
+var CLOSE = ".iridium-cc-preferences_close-icon";
+var OPTION_FIELD = ".iridium-cc-prefs_option";
+var OPTION_CHECKBOX_VISUAL = ".switch-wrap";
+var OPTION_TOGGLE_KNUB = ".circle";
 var OPTION_CHECKBOX_INPUT = (which) => `[iridium-cc-checkbox="${which}"]`;
-var DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="deny"]';
-var ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs2_button[iridium-cc="allow"]';
-var SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs2_submit.w-button[iridium-cc="submit"]';
+var DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs_button[iridium-cc="deny"]';
+var ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs_button[iridium-cc="allow"]';
+var SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs_submit.w-button[iridium-cc="submit"]';
 var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
   const state2 = {
     askBanner: document.querySelector(ASK_BANNER),
@@ -163,7 +164,7 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
       }
       throw logErr("no candidate matches", which);
     },
-    optionCheckboxVisual: (which) => {
+    optionToggleVisual: (which) => {
       const all = document.querySelectorAll(OPTION_CHECKBOX_VISUAL);
       const selector = OPTION_CHECKBOX_INPUT(which);
       for (const candidate of all) {
@@ -175,6 +176,19 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
         return candidate;
       }
       throw logErr("no candidate matches", which);
+    },
+    optionToggleKnub: (which) => {
+      const all = document.querySelectorAll(OPTION_CHECKBOX_VISUAL);
+      const selector = OPTION_CHECKBOX_INPUT(which);
+      for (const candidate of all) {
+        const root = candidate.parentElement;
+        const correctCheckbox = root.querySelector(selector);
+        if (correctCheckbox === null) {
+          continue;
+        }
+        return candidate.querySelector(OPTION_TOGGLE_KNUB);
+      }
+      throw logErr("no candidate matches (knub)", which);
     },
     optionCheckboxInput: (which) => {
       return document.querySelector(OPTION_CHECKBOX_INPUT(which));
@@ -222,24 +236,30 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
   const check = (which) => {
     logInfo("ui check", which);
     const input = state2.optionCheckboxInput(which);
-    const visual = state2.optionCheckboxVisual(which);
+    const visual = state2.optionToggleVisual(which);
+    const knub = state2.optionToggleKnub(which);
     input.checked = true;
-    visual.classList.add("w--redirected-checked");
+    visual.classList.add("switch-checked");
+    knub.classList.add("circle-checked");
     setTimeout(() => {
       input.checked = true;
-      visual.classList.add("w--redirected-checked");
+      visual.classList.add("switch-checked");
+      knub.classList.add("circle-checked");
     }, 0);
     logInfo(visual.classList);
   };
   const unCheck = (which) => {
     logInfo("ui uncheck", which);
     const input = state2.optionCheckboxInput(which);
-    const visual = state2.optionCheckboxVisual(which);
+    const visual = state2.optionToggleVisual(which);
+    const knub = state2.optionToggleKnub(which);
     input.checked = false;
-    visual.classList.remove("w--redirected-checked");
+    visual.classList.remove("switch-checked");
+    knub.classList.remove("circle-checked");
     setTimeout(() => {
-      input.checked = true;
-      visual.classList.remove("w--redirected-checked");
+      input.checked = false;
+      visual.classList.remove("switch-checked");
+      knub.classList.remove("circle-checked");
     }, 0);
     logInfo(visual.classList);
   };

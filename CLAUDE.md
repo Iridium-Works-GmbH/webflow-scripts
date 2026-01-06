@@ -48,3 +48,22 @@ Canonical staging environment for testing:
 - Design mode: https://iridium-works-master-template.design.webflow.com/
 - Published site: https://iridium-works-master-template.webflow.io/
 - Custom code: https://webflow.com/dashboard/sites/iridium-works-master-template/custom-code
+
+## Cookie Consent UI Implementation
+
+The cookie consent script uses custom toggle switches instead of Webflow's default checkboxes:
+
+**CSS Selectors:**
+- Banner: `.iridium-cc-banner_component`
+- Preferences panel: `.iridium-cc-prefs_component`
+- Toggle wrapper: `.switch-wrap`
+- Toggle knub: `.circle`
+
+**Custom Classes for State:**
+- Checked state: `switch-checked` (on wrapper), `circle-checked` (on knub)
+- These replace Webflow's default `w--redirected-checked` class
+
+**Implementation Notes:**
+- Toggle visual state is managed by adding/removing custom CSS classes
+- Separate handling for the toggle wrapper (`.switch-wrap`) and knub element (`.circle`)
+- Uses `setTimeout(0)` hack for reliable checkbox state updates
