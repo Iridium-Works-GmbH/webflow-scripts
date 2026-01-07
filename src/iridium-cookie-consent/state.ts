@@ -1,27 +1,27 @@
 import { logInfo } from "./logger";
-import { trackingChoicePrefix, WebflowConsent } from "./webflow";
+import { trackingChoicePrefix, WFC } from "./webflow";
 
-export type Category = 'marketing' | 'personalized' | 'analytics';
+export type Category = 'component_a' | 'component_b' | 'component_c';
 
 const lsPrefixed = (which: Category): string => {
   return `iridium-cc:${which}`;
 };
 const readConsent = (
   which: Category,
-): null | WebflowConsent => {
+): null | WFC => {
   const val = localStorage.getItem(lsPrefixed(which));
   if (val === null) { return null; }
 
   switch (val) {
-    case WebflowConsent.ALLOW:
-    case WebflowConsent.DENY:
+    case WFC.ALLOW:
+    case WFC.DENY:
       return val;
     default: return null;
   }
 };
 
 // assumes webflow to _have set_ it to some value already
-const setIntellimizeTrackingChoice = (consentChoice: WebflowConsent) => {
+const setIntellimizeTrackingChoice = (consentChoice: WFC) => {
   logInfo('setting tracking choice to', consentChoice);
 
   const amountItems = localStorage.length;
@@ -52,24 +52,24 @@ const purgeIntellimize = (): void => {
 
 
 const initialState = (): ConsentState => {
-  const marketing = readConsent('marketing');
-  const personalized = readConsent('personalized');
-  const analytics = readConsent('analytics');
+  const component_b = readConsent('component_b');
+  const component_c = readConsent('component_c');
+  const component_a = readConsent('component_a');
 
   let checked = true;
-  if (marketing === null) {
+  if (component_b === null) {
     checked = false;
-  } else if (personalized === null) {
+  } else if (component_c === null) {
     checked = false;
-  } else if (analytics === null) {
+  } else if (component_a === null) {
     checked = false;
   }
 
   const s: ConsentState = {
     checked,
-    analytics: analytics === WebflowConsent.ALLOW,
-    marketing: marketing === WebflowConsent.ALLOW,
-    personalized: personalized === WebflowConsent.ALLOW,
+    component_a: component_a === WFC.ALLOW,
+    component_b: component_b === WFC.ALLOW,
+    component_c: component_c === WFC.ALLOW,
   };
   return s;
 };
@@ -77,27 +77,27 @@ const initialState = (): ConsentState => {
 // stable reference
 export const state: ConsentState = initialState();
 export type ConsentState = {
-  checked: boolean; // whether we know of any existing opt-out (or in)
+  checked: boolean;
 
-  marketing: boolean;
-  personalized: boolean;
-  analytics: boolean;
+  component_a: boolean;
+  component_b: boolean;
+  component_c: boolean;
 };
 // ALWAYS writes into localstorage, doesn't clear
 export const persist = (): void => {
-  const keys: Category[] = ['analytics', 'marketing', 'personalized'];
+  const keys: Category[] = ['component_a', 'component_b', 'component_c'];
   for (const key of keys) {
     const lsKey = lsPrefixed(key);
-    const value = state[key] ? WebflowConsent.ALLOW : WebflowConsent.DENY;
+    const value = state[key] ? WFC.ALLOW : WFC.DENY;
     localStorage.setItem(lsKey, value);
   }
 
-  if (state.analytics) {
+  if (state.component_a) {
     if (typeof wf !== 'undefined') {
       wf.allowUserTracking({ activate: true });
     }
 
-    setIntellimizeTrackingChoice(WebflowConsent.ALLOW);
+    setIntellimizeTrackingChoice(WFC.ALLOW);
   } else {
     if (typeof wf !== 'undefined') {
       wf.denyUserTracking();

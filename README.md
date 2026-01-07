@@ -39,32 +39,41 @@ A GDPR-compliant cookie consent system for Webflow that manages analytics, marke
 - Integration with Webflow's native tracking API
 - Support for Intellimize tracking controls
 - Settings manager accessible via floating button
+- Ad blocker resistant design using obfuscated class names
 
 #### Required Webflow Components
 
-Your Webflow project must include HTML elements with these attributes:
+Your Webflow project must include HTML elements with these classes and attributes. **Important**: All consent UI elements should have `display: none` set by default in Webflow designer. The script will show the appropriate element on successful initialization.
 
 **Consent Banner** (shown on first visit):
-- `.iridium-cc-banner2_component` - Main banner container
-- `a.iridium-cc-banner2_button_decline` - Decline all button
-- `.iridium-cc-banner2_button[iridium-cc="allow"]` - Accept all button
+- `.ir-notice` - Main banner container
+- `a.ir-notice-decline` - Decline all button
+- `.ir-notice-accept[ir-action="allow"]` - Accept all button
 
 **Settings Manager** (shown after initial choice):
-- `.iridium-cc-manager2_button` - Floating button to open preferences
-- `.iridium-cc-prefs2_component` - Preferences panel container
-- `.iridium-cc-preferences2_close-icon` - Close button
+- `.ir-manager` - Floating button to open preferences
+- `.ir-settings` - Preferences panel container
+- `.ir-settings-close` - Close button
 
 **Preference Controls**:
-- `.iridium-cc-prefs2_option` - Wrapper for each checkbox option
-- `[iridium-cc-checkbox="analytics"]` - Analytics checkbox input
-- `[iridium-cc-checkbox="marketing"]` - Marketing checkbox input
-- `[iridium-cc-checkbox="personalized"]` - Personalized checkbox input
-- `.w-checkbox-input` - Webflow's visual checkbox element
+- `.ir-option` - Wrapper for each toggle option
+- `[ir-toggle="component_a"]` - Analytics toggle input
+- `[ir-toggle="component_b"]` - Marketing toggle input
+- `[ir-toggle="component_c"]` - Personalized tracking toggle input
+- `.switch-wrap` - Custom toggle wrapper (visual state)
+- `.circle` - Toggle knub element
 
 **Preference Actions**:
-- `a.iridium-cc-prefs2_button[iridium-cc="deny"]` - Disable all button
-- `a.iridium-cc-prefs2_button[iridium-cc="allow"]` - Allow all button
-- `a.iridium-cc-prefs2_submit.w-button[iridium-cc="submit"]` - Save settings button
+- `a.ir-settings-button[ir-action="deny"]` - Disable all button
+- `a.ir-settings-button[ir-action="allow"]` - Allow all button
+- `a.ir-settings-submit.w-button[ir-action="submit"]` - Save settings button
+
+#### Component Name Mappings
+
+The script uses obfuscated component names to avoid ad blocker detection:
+- `component_a` = Analytics tracking
+- `component_b` = Marketing tracking
+- `component_c` = Personalized tracking
 
 #### Installation
 
@@ -77,10 +86,10 @@ Your Webflow project must include HTML elements with these attributes:
 
 #### How It Works
 
-1. On first visit, the consent banner (`.iridium-cc-banner2_component`) is displayed
+1. On first visit, the consent banner (`.ir-notice`) is displayed
 2. User can accept all, decline all, or open preferences for granular control
 3. Choices are saved to LocalStorage with keys prefixed `iridium-cc:`
-4. After initial choice, a floating button (`.iridium-cc-manager2_button`) appears
+4. After initial choice, a floating button (`.ir-manager`) appears
 5. Users can modify preferences anytime via the settings manager
 6. The script integrates with Webflow's tracking API and manages Intellimize consent
 
@@ -90,6 +99,8 @@ Your Webflow project must include HTML elements with these attributes:
 - Compatible with Webflow's `wf.ready()` API
 - Stores consent as `WebflowConsent.ALLOW` or `WebflowConsent.DENY` values
 - Necessary cookies are always enabled and cannot be disabled
+- Uses obfuscated class names and attributes to avoid ad blocker interference
+- All UI elements start hidden (`display: none`) and are revealed by the script to gracefully handle ad blocker scenarios
 
 ---
 

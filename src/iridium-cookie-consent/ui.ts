@@ -2,19 +2,19 @@ import { Category, ConsentState } from "./state";
 import { logErr, logInfo } from "./logger";
 
 // we require these values in the actual webflow components
-const ASK_BANNER = '.iridium-cc-banner_component';
-const ASK_BANNER_DECLINE_BUTTON = 'a.iridium-cc-banner_button_decline';
-const ASK_BANNER_ACCEPT_BUTTON = '.iridium-cc-banner_button[iridium-cc="allow"]';
-const OPENER = '.iridium-cc-manager_component';
-const DETAILS = '.iridium-cc-prefs_component';
-const CLOSE = '.iridium-cc-preferences_close-icon';
-const OPTION_FIELD = '.iridium-cc-prefs_option';
+const ASK_BANNER = '.ir-notice';
+const ASK_BANNER_DECLINE_BUTTON = 'a.ir-notice-decline';
+const ASK_BANNER_ACCEPT_BUTTON = '.ir-notice-accept[ir-action="allow"]';
+const OPENER = '.ir-manager';
+const DETAILS = '.ir-settings';
+const CLOSE = '.ir-settings-close';
+const OPTION_FIELD = '.ir-option';
 const OPTION_CHECKBOX_VISUAL = '.switch-wrap';
 const OPTION_TOGGLE_KNUB = '.circle';
-const OPTION_CHECKBOX_INPUT = (which: Category) => `[iridium-cc-checkbox="${which}"]`;
-const DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs_button[iridium-cc="deny"]';
-const ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs_button[iridium-cc="allow"]';
-const SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs_submit.w-button[iridium-cc="submit"]';
+const OPTION_CHECKBOX_INPUT = (which: Category) => `[ir-toggle="${which}"]`;
+const DISABLE_ALL_BUTTON = 'a.ir-settings-button[ir-action="deny"]';
+const ALLOW_ALL_BUTTON = 'a.ir-settings-button[ir-action="allow"]';
+const SAVE_SETTINGS_BUTTON = 'a.ir-settings-submit.w-button[ir-action="submit"]';
 
 type UiState = {
   askBanner: HTMLElement;
@@ -191,9 +191,9 @@ export const initUi = (
     decliner.addEventListener('click', () => {
       logInfo('clicked decliner', decliner);
       disableAll();
-      unCheck('analytics');
-      unCheck('marketing');
-      unCheck('personalized');
+      unCheck('component_a');
+      unCheck('component_b');
+      unCheck('component_c');
 
       askBanner.hide();
       details.hide();
@@ -210,16 +210,16 @@ export const initUi = (
     accepter.addEventListener('click', () => {
       logInfo('clicked accepter', accepter);
       allowAll();
-      check('analytics');
-      check('marketing');
-      check('personalized');
+      check('component_a');
+      check('component_b');
+      check('component_c');
 
       askBanner.hide();
       details.hide();
     });
   }
 
-  for (const category of ['analytics', 'marketing', 'personalized'] as const) {
+  for (const category of ['component_a', 'component_b', 'component_c'] as const) {
     let debounce = false;
     state.optionCheckboxInput(category).addEventListener('click', () => {
       console.log(JSON.stringify(initialState));
@@ -241,12 +241,11 @@ export const initUi = (
   logInfo('listeners fully wired up');
 
   logInfo('applying initial state to ui');
+  // All elements start as display:none
   if (initialState.checked) {
-    state.askBanner.style.display = 'none';
-    state.details.style.display = 'none';
     state.opener.style.display = 'flex';
 
-    for (const category of ['analytics', 'marketing', 'personalized'] as const) {
+    for (const category of ['component_a', 'component_b', 'component_c'] as const) {
       const checked = initialState[category];
       if (checked) {
         check(category);
@@ -256,8 +255,6 @@ export const initUi = (
     }
   } else {
     state.askBanner.style.display = 'flex';
-    state.details.style.display = 'none';
-    state.opener.style.display = 'none';
   }
 
   console.log(state);

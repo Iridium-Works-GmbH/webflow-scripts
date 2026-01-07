@@ -51,11 +51,18 @@ Canonical staging environment for testing:
 
 ## Cookie Consent UI Implementation
 
-The cookie consent script uses custom toggle switches instead of Webflow's default checkboxes:
+The cookie consent script uses custom toggle switches and obfuscated naming to avoid ad blocker interference:
+
+**Ad Blocker Resistance Strategy:**
+- Uses short, generic class names (`.ir-notice`, `.ir-settings`) instead of obvious cookie/consent terminology
+- Data attributes use `ir-action` and `ir-toggle` instead of `iridium-cc` or `consent`
+- Internal category names use generic identifiers (`component_a`, `component_b`, `component_c`) instead of `analytics`, `marketing`, `personalized`
+- All UI elements must start with `display: none` in Webflow designer - script reveals only needed elements on successful initialization
 
 **CSS Selectors:**
-- Banner: `.iridium-cc-banner_component`
-- Preferences panel: `.iridium-cc-prefs_component`
+- Banner: `.ir-notice`
+- Preferences panel: `.ir-settings`
+- Manager button: `.ir-manager`
 - Toggle wrapper: `.switch-wrap`
 - Toggle knub: `.circle`
 
@@ -67,3 +74,4 @@ The cookie consent script uses custom toggle switches instead of Webflow's defau
 - Toggle visual state is managed by adding/removing custom CSS classes
 - Separate handling for the toggle wrapper (`.switch-wrap`) and knub element (`.circle`)
 - Uses `setTimeout(0)` hack for reliable checkbox state updates
+- UI initialization only reveals banner (first visit) OR manager button (returning users), never both

@@ -67,34 +67,34 @@ var purgeIntellimize = () => {
   }
 };
 var initialState = () => {
-  const marketing = readConsent("marketing");
-  const personalized = readConsent("personalized");
-  const analytics = readConsent("analytics");
+  const component_b = readConsent("component_b");
+  const component_c = readConsent("component_c");
+  const component_a = readConsent("component_a");
   let checked = true;
-  if (marketing === null) {
+  if (component_b === null) {
     checked = false;
-  } else if (personalized === null) {
+  } else if (component_c === null) {
     checked = false;
-  } else if (analytics === null) {
+  } else if (component_a === null) {
     checked = false;
   }
   const s = {
     checked,
-    analytics: analytics === "allow" /* ALLOW */,
-    marketing: marketing === "allow" /* ALLOW */,
-    personalized: personalized === "allow" /* ALLOW */
+    component_a: component_a === "allow" /* ALLOW */,
+    component_b: component_b === "allow" /* ALLOW */,
+    component_c: component_c === "allow" /* ALLOW */
   };
   return s;
 };
 var state = initialState();
 var persist = () => {
-  const keys = ["analytics", "marketing", "personalized"];
+  const keys = ["component_a", "component_b", "component_c"];
   for (const key of keys) {
     const lsKey = lsPrefixed(key);
     const value = state[key] ? "allow" /* ALLOW */ : "deny" /* DENY */;
     localStorage.setItem(lsKey, value);
   }
-  if (state.analytics) {
+  if (state.component_a) {
     if (typeof wf !== "undefined") {
       wf.allowUserTracking({ activate: true });
     }
@@ -131,19 +131,19 @@ var toggleCheckbox = (which) => {
 };
 
 // src/iridium-cookie-consent/ui.ts
-var ASK_BANNER = ".iridium-cc-banner_component";
-var ASK_BANNER_DECLINE_BUTTON = "a.iridium-cc-banner_button_decline";
-var ASK_BANNER_ACCEPT_BUTTON = '.iridium-cc-banner_button[iridium-cc="allow"]';
-var OPENER = ".iridium-cc-manager_component";
-var DETAILS = ".iridium-cc-prefs_component";
-var CLOSE = ".iridium-cc-preferences_close-icon";
-var OPTION_FIELD = ".iridium-cc-prefs_option";
+var ASK_BANNER = ".ir-notice";
+var ASK_BANNER_DECLINE_BUTTON = "a.ir-notice-decline";
+var ASK_BANNER_ACCEPT_BUTTON = '.ir-notice-accept[ir-action="allow"]';
+var OPENER = ".ir-manager";
+var DETAILS = ".ir-settings";
+var CLOSE = ".ir-settings-close";
+var OPTION_FIELD = ".ir-option";
 var OPTION_CHECKBOX_VISUAL = ".switch-wrap";
 var OPTION_TOGGLE_KNUB = ".circle";
-var OPTION_CHECKBOX_INPUT = (which) => `[iridium-cc-checkbox="${which}"]`;
-var DISABLE_ALL_BUTTON = 'a.iridium-cc-prefs_button[iridium-cc="deny"]';
-var ALLOW_ALL_BUTTON = 'a.iridium-cc-prefs_button[iridium-cc="allow"]';
-var SAVE_SETTINGS_BUTTON = 'a.iridium-cc-prefs_submit.w-button[iridium-cc="submit"]';
+var OPTION_CHECKBOX_INPUT = (which) => `[ir-toggle="${which}"]`;
+var DISABLE_ALL_BUTTON = 'a.ir-settings-button[ir-action="deny"]';
+var ALLOW_ALL_BUTTON = 'a.ir-settings-button[ir-action="allow"]';
+var SAVE_SETTINGS_BUTTON = 'a.ir-settings-submit.w-button[ir-action="submit"]';
 var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
   const state2 = {
     askBanner: document.querySelector(ASK_BANNER),
@@ -268,9 +268,9 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
     decliner.addEventListener("click", () => {
       logInfo("clicked decliner", decliner);
       disableAll();
-      unCheck("analytics");
-      unCheck("marketing");
-      unCheck("personalized");
+      unCheck("component_a");
+      unCheck("component_b");
+      unCheck("component_c");
       askBanner.hide();
       details.hide();
     });
@@ -282,14 +282,14 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
     accepter.addEventListener("click", () => {
       logInfo("clicked accepter", accepter);
       allowAll2();
-      check("analytics");
-      check("marketing");
-      check("personalized");
+      check("component_a");
+      check("component_b");
+      check("component_c");
       askBanner.hide();
       details.hide();
     });
   }
-  for (const category of ["analytics", "marketing", "personalized"]) {
+  for (const category of ["component_a", "component_b", "component_c"]) {
     let debounce = false;
     state2.optionCheckboxInput(category).addEventListener("click", () => {
       console.log(JSON.stringify(initialState2));
@@ -310,10 +310,8 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
   logInfo("listeners fully wired up");
   logInfo("applying initial state to ui");
   if (initialState2.checked) {
-    state2.askBanner.style.display = "none";
-    state2.details.style.display = "none";
     state2.opener.style.display = "flex";
-    for (const category of ["analytics", "marketing", "personalized"]) {
+    for (const category of ["component_a", "component_b", "component_c"]) {
       const checked = initialState2[category];
       if (checked) {
         check(category);
@@ -323,8 +321,6 @@ var initUi = (disableAll, allowAll2, onToggle, initialState2) => {
     }
   } else {
     state2.askBanner.style.display = "flex";
-    state2.details.style.display = "none";
-    state2.opener.style.display = "none";
   }
   console.log(state2);
   logInfo("setup routine done");
