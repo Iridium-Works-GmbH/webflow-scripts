@@ -4,18 +4,18 @@ import { Category, persist, state } from "./state";
 export const allowAll = () => {
   state.checked = true;
 
-  state.analytics = true;
-  state.marketing = true;
-  state.personalized = true;
+  state.component_a = true;
+  state.component_b = true;
+  state.component_c = true;
   persist();
 };
 
 export const denyAll = () => {
   state.checked = true;
 
-  state.analytics = false;
-  state.marketing = false;
-  state.personalized = false;
+  state.component_a = false;
+  state.component_b = false;
+  state.component_c = false;
   persist();
 };
 
